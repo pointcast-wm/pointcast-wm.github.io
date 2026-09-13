@@ -212,7 +212,7 @@
         <div class="ep-select" title="The three episodes whose error on each stage is closest to that stage's median over the scored campaign"><button type="button" data-fps="4" data-frames="31" class="ep-btn is-active" data-src="static/videos/planning_seqopen_s9.mp4" data-poster="static/videos/planning_seqopen_s9_poster.jpg" data-w="1600" data-h="1000">episode 1</button><button type="button" data-fps="4" data-frames="24" class="ep-btn" data-src="static/videos/planning_seqopen_s11.mp4" data-poster="static/videos/planning_seqopen_s11_poster.jpg" data-w="1600" data-h="1000">episode 2</button><button type="button" data-fps="4" data-frames="42" class="ep-btn" data-src="static/videos/planning_seqopen_s8.mp4" data-poster="static/videos/planning_seqopen_s8_poster.jpg" data-w="1600" data-h="1000">episode 3</button></div>
         <video data-fps="4" data-frames="31" width="1600" height="1000" data-autoplay muted loop playsinline preload="metadata" poster="static/videos/planning_seqopen_s9_poster.jpg"><source src="static/videos/planning_seqopen_s9.mp4" type="video/mp4"></video>
         <div class="video-title">Sequential articulation</div>
-        <div class="video-note">Two of the cabinet's parts, in a sampled order: the first is driven to its commanded position, the tool lets go, crosses the cabinet face and takes the second handle, and both have to still be at their goals at the end. Both commanded parts carry the object colour and the uncommanded ones stay gray; a part has arrived when the green goal points sit on it. The release and the crossing are a fixed trajectory, identical for every model, so the models plan the stages rather than the sequence. Limitations below says why.</div>
+        <div class="video-note">Two of the cabinet's parts, in a sampled order: the first is driven to its commanded position, the tool lets go, crosses the cabinet face and takes the second handle, and both have to still be at their goals at the end. Both commanded parts carry the object colour and the uncommanded ones stay gray; a part has arrived when the green goal points sit on it. The release and the crossing are a fixed trajectory, identical for every model, so the models plan the stages rather than the sequence.</div>
       </div>
       <div class="video-card">
         <div class="ep-select" title="Three episodes near the median of PointCast's error over the scored campaign"><button type="button" data-fps="4" data-frames="10" class="ep-btn" data-src="static/videos/planning_cloth_s14.mp4" data-poster="static/videos/planning_cloth_s14_poster.jpg" data-w="1600" data-h="1000">episode 1</button><button type="button" data-fps="4" data-frames="10" class="ep-btn is-active" data-src="static/videos/planning_cloth_s8.mp4" data-poster="static/videos/planning_cloth_s8_poster.jpg" data-w="1600" data-h="1000">episode 2</button><button type="button" data-fps="4" data-frames="10" class="ep-btn" data-src="static/videos/planning_cloth_s13.mp4" data-poster="static/videos/planning_cloth_s13_poster.jpg" data-w="1600" data-h="1000">episode 3</button></div>
@@ -262,7 +262,7 @@
 <section class="section is-alt" id="limitations">
   <div class="container is-max-desktop">
     <h2 class="title is-3 has-text-centered">Limitations</h2>
-    <p class="section-lead">Where the model is weak, shown the same way as everything else on this page. The clips below are the hardest tenth of each evaluation pool, and a task the model does not begin at all.</p>
+    <p class="section-lead">Where the model is weak, shown the same way as everything else on this page. The clips below are the hardest tenth of each evaluation pool.</p>
   </div>
   <div class="rollout-wide">
         <div class="rollout">
@@ -283,28 +283,6 @@
           <div class="rollout-title">Zero-shot, hardest windows</div>
           <div class="rollout-note">The worst-decile window of the two zero-shot captures that carry more than one registered window.</div>
         </div>
-  </div>
-  <div class="container is-max-desktop">
-    <h3 class="title is-4 has-text-centered" style="margin-top:2.5rem">It cannot start a push from rest</h3>
-    <p class="section-lead">PointCast plans the rope <i>drag</i> task and cannot start the rope <i>push</i>. Placed at rest a centimetre behind a still rope, it predicts about 2 mm of motion where the simulator gives 37 mm, so holding still scores as well as pushing and the planner never commits. The cause is what it was shown, not how it samples: in our rope-push training episodes the rope is already moving within a frame of the tool appearing, so the model learned to continue the motion it sees rather than to read the tool. A model that ties motion to the tool does start the push, and a deterministic-head model trained on our data does not. Fixing ours needs training pushes that begin before contact.</p>
-    <div class="video-grid">
-<div class="video-card">
-          <video data-fps="4" data-frames="11" width="1600" height="1000" data-autoplay muted loop playsinline preload="metadata" poster="static/videos/planning_rope_s14_poster.jpg"><source src="static/videos/planning_rope_s14.mp4" type="video/mp4"></video>
-          <div class="video-title">Dragging a rope</div>
-          <div class="video-note">The rope drag task from the planning section above, repeated here for contrast. The model plans the carry and the target is reached at the first window.</div>
-        </div>
-        <div class="video-card">
-          <video data-fps="4" data-frames="32" width="1600" height="1000" data-autoplay muted loop playsinline preload="metadata" poster="static/videos/limitation_rope_push_poster.jpg"><source src="static/videos/limitation_rope_push.mp4" type="video/mp4"></video>
-          <div class="video-title">Starting a push on a rope</div>
-          <div class="video-note">The rope push task, every window of the budget. The pusher reaches the rope and the model never asks it to move, so the rope stays straight and the goal shape is never approached.</div>
-        </div>
-    </div>
-
-    <h3 class="title is-4 has-text-centered" style="margin-top:2.5rem">Most planning tasks are too easy to rank models</h3>
-    <p class="section-lead">Every learned world model reaches the tasks that carry an object to a goal, most of them within the first few windows, so those rows measure the planner more than the model. The SE(2) push and the sequential articulation task are the two that separate them, and this is why the articulation task on this page commands two joints rather than one: the single-joint version put every model inside a centimetre, while the sequential one spreads the same five from 100% to 0%. Even so, a single per-task number is not a ranking. The planner is stochastic, and re-running one checkpoint on the same scenes moves its cabinet result by 46%.</p>
-
-    <h3 class="title is-4 has-text-centered" style="margin-top:2.5rem">A release is invisible in the state</h3>
-    <p class="section-lead">When the gripper lets go, nothing in a point set says so: points record where things are, not whether a grasp is closed. A retract then looks exactly like a pull, since either way the tool sits on the handle and moves outward. So immediately after a release the model keeps predicting that the part follows the tool, by about seven centimetres, and its one-window error rises roughly fivefold across the three windows that span the release before recovering. We measured this before building the sequential task, against a bar fixed in advance, and it failed. That is why the move between the two stages is a fixed trajectory rather than something a model is asked to predict.</p>
   </div>
 </section>
 
@@ -333,7 +311,7 @@
     <details class="extra">
       <summary>Sequential articulation: the three scores, the door / drawer split, and the protocol</summary>
       <div class="content has-text-justified">
-        <p>The task commands two of the two-to-four movable parts of a mixed cabinet, in a sampled order, over the same scenes and with the same per-part metric as the single-joint version it replaces, which commanded one part and which every learned model solved to inside a centimetre. A stage ends when its joint is inside its own threshold and has stopped moving, or at a budget of 30 windows. Between the stages the grasp is released, the tool retracts to a 10 cm standoff, crosses to the next handle and approaches it, over 15 frames that are the same for every model and that no model plans. Every model observes those frames, so each enters its second stage with a history that contains the tool arriving. Sixteen episodes, seeds 0 to 15, the checkpoints and inference settings of Table I, simulation only.</p>
+        <p>The task commands two of the two-to-four movable parts of a mixed cabinet, in a sampled order, over the same scenes and with the same per-part metric as the single-joint version it replaces, which commanded one part and which every learned model solved to inside a centimetre. A stage ends when its joint is inside its own threshold and has stopped moving, or at a budget of 30 windows. Between the stages the grasp is released, the tool retracts to a 10 cm standoff, crosses to the next handle and approaches it, over 15 frames that are the same for every model and that no model plans. Every model observes those frames, so each enters its second stage with a history that contains the tool arriving. That the crossing is scripted is a result rather than a convenience: a point set does not record whether a grasp is closed, so a retract looks like a pull and the models keep predicting that the released part follows the tool. We fixed that test and its bar before building the task, the models' one-window error rose about fivefold across a release, and the test failed, which is why no model is asked to plan through one. Sixteen episodes, seeds 0 to 15, the checkpoints and inference settings of Table I, simulation only.</p>
         <p>Doors are scored in radians against a 0.05 rad threshold and drawers in metres against 1.5 cm, so the pass criterion is type-normalized; the distances below are per-part point distances and are directly comparable within a column.</p>
       </div>
     <div class="table-wrap">
