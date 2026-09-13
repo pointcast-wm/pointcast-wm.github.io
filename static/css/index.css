@@ -170,6 +170,10 @@ table.paper-table.is-wide th, table.paper-table.is-wide td { padding: .3rem .4re
 .rollout-wide { max-width: 1400px; margin: 1.25rem auto 0; padding: 0 .5rem; }
 .rollout { background: #fff; border: 1px solid var(--rule); border-radius: var(--radius); overflow: hidden; margin-bottom: 1rem; }
 .rollout video { width: 100%; height: auto; display: block; background: #fff; }
+/* Cards whose episodes differ in crop height keep one reserved box, sized by
+   index.js from the tallest variant. A shorter clip letterboxes on white
+   instead of resizing the card and reflowing everything below it. */
+.rollout video.ep-fixed { object-fit: contain; }
 .rollout .rollout-title { font-weight: 600; padding: .55rem .8rem 0; color: var(--ink); }
 .rollout .rollout-note { font-size: .88rem; color: var(--ink-3); padding: .1rem .8rem .6rem; }
 /* the two method figures lead the page: the pipeline spans the wide column, the attention strip the text column */

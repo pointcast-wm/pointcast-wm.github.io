@@ -61,19 +61,59 @@
     lazy.forEach(function (v) { obs.observe(v); });
   }
 
+  // Freeze each swappable card at its tallest variant's aspect ratio. The
+  // clips in one card are crops of different windows and differ in height by
+  // up to 60%, so writing each variant's size onto the element made the card --
+  // and everything below it -- reflow on every click. The box is reserved once;
+  // shorter clips letterbox inside it (object-fit: contain, white ground).
+  function reserveBox(sel, video) {
+    var w = parseInt(video.getAttribute('width'), 10) || 0;
+    var h = parseInt(video.getAttribute('height'), 10) || 0;
+    var ratio = w > 0 && h > 0 ? h / w : 0;
+    sel.querySelectorAll('.ep-btn').forEach(function (b) {
+      var bw = parseInt(b.getAttribute('data-w'), 10) || 0;
+      var bh = parseInt(b.getAttribute('data-h'), 10) || 0;
+      if (bw > 0 && bh > 0 && bh / bw > ratio) { ratio = bh / bw; w = bw; h = bh; }
+    });
+    if (w > 0 && ratio > 0) {
+      video.setAttribute('width', w);
+      video.setAttribute('height', Math.round(w * ratio));
+      video.classList.add('ep-fixed');
+    }
+  }
+
+  // Carry the frame on screen across the swap. `video.load()` tears the element
+  // down and paints its poster while the next clip buffers, which read as a
+  // flash; painting the current frame into the poster first means the still the
+  // browser shows is the frame the viewer was already looking at.
+  function holdCurrentFrame(video, fallback) {
+    try {
+      if (!video.videoWidth) { video.setAttribute('poster', fallback); return; }
+      var cw = Math.min(video.videoWidth, video.clientWidth || video.videoWidth);
+      var c = document.createElement('canvas');
+      c.width = cw;
+      c.height = Math.round(cw * video.videoHeight / video.videoWidth);
+      c.getContext('2d').drawImage(video, 0, 0, c.width, c.height);
+      video.setAttribute('poster', c.toDataURL('image/jpeg', 0.8));
+    } catch (e) {
+      video.setAttribute('poster', fallback);  // tainted or unsupported
+    }
+  }
+
   // episode selector: swap the card's clip and its frame data, keep playing
   document.querySelectorAll('.ep-select').forEach(function (sel) {
     var card = sel.parentElement;
     var video = card.querySelector('video');
     var source = video.querySelector('source');
+    reserveBox(sel, video);
     sel.querySelectorAll('.ep-btn').forEach(function (b) {
       b.addEventListener('click', function () {
         if (b.disabled || b.classList.contains('is-active')) { return; }
         sel.querySelectorAll('.ep-btn').forEach(function (x) { x.classList.remove('is-active'); });
         b.classList.add('is-active');
+        holdCurrentFrame(video, b.getAttribute('data-poster'));
         source.setAttribute('src', b.getAttribute('data-src'));
-        video.setAttribute('poster', b.getAttribute('data-poster'));
-        if (b.getAttribute('data-w') !== '0') { video.setAttribute('width', b.getAttribute('data-w')); video.setAttribute('height', b.getAttribute('data-h')); }
+        // width/height are deliberately NOT rewritten: the box is reserved above.
         if (b.getAttribute('data-fps')) { video.dataset.fps = b.getAttribute('data-fps'); video.dataset.frames = b.getAttribute('data-frames'); }
         video.dataset.userPaused = '';
         video.load();
