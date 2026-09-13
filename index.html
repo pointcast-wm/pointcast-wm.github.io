@@ -200,19 +200,19 @@
 <section class="section" id="planning">
   <div class="container is-max-desktop">
     <h2 class="title is-3 has-text-centered">Planning with the world model</h2>
-    <p class="section-lead">PointCast frozen inside sampling-based MPC, one network evaluation per window. Three episodes per task, re-rendered from the stored simulator states: <span class="legend-dot object"></span>object, <span class="legend-dot goal"></span>goal point set, <span class="legend-dot actor"></span>end-effector with its executed path. One frame per executed window. The three seeds are those whose scored episodes sit closest to the median of PointCast's error over the campaign, and the clips are fresh re-runs of those seeds: the planner draws unseeded noise, so a re-run is a different episode from the scored one. Each clip ends three windows after the task's success criterion is first met; the scored run continues to its fixed budget.</p>
+    <p class="section-lead">PointCast frozen inside sampling-based MPC, one network evaluation per window. Three episodes per task, re-rendered from the stored simulator states: <span class="legend-dot object"></span>object, <span class="legend-dot goal"></span>goal point set, <span class="legend-dot actor"></span>end-effector with its executed path. One frame per executed window. The three seeds are those whose scored episodes sit closest to the median of PointCast's error over the campaign, and the clips are fresh re-runs of those seeds: the planner draws unseeded noise, so a re-run is a different episode from the scored one. The three pushing and dragging clips end three windows after the task's success criterion is first met, and their scored runs continue to a fixed budget; the sequential clip runs its whole episode, which ends when both stages do.</p>
     <div class="video-grid">
       <div class="video-card">
-        <div class="ep-select" title="Three episodes near the median of PointCast's error over the scored campaign"><button type="button" data-fps="4" data-frames="21" class="ep-btn" data-src="static/videos/planning_pose_s13.mp4" data-poster="static/videos/planning_pose_s13_poster.jpg" data-w="1600" data-h="1000">episode 1</button><button type="button" data-fps="4" data-frames="13" class="ep-btn is-active" data-src="static/videos/planning_pose_s11.mp4" data-poster="static/videos/planning_pose_s11_poster.jpg" data-w="1600" data-h="1000">episode 2</button><button type="button" data-fps="4" data-frames="13" class="ep-btn" data-src="static/videos/planning_pose_s6.mp4" data-poster="static/videos/planning_pose_s6_poster.jpg" data-w="1600" data-h="1000">episode 3</button></div>
-        <video data-fps="4" data-frames="13" width="1600" height="1000" data-autoplay muted loop playsinline preload="metadata" poster="static/videos/planning_pose_s11_poster.jpg"><source src="static/videos/planning_pose_s11.mp4" type="video/mp4"></video>
+        <div class="ep-select" title="The three episodes whose final error is closest to the median over all sixteen"><button type="button" data-fps="4" data-frames="12" class="ep-btn is-active" data-src="static/videos/planning_pose_s6.mp4" data-poster="static/videos/planning_pose_s6_poster.jpg" data-w="1600" data-h="1000">episode 1</button><button type="button" data-fps="4" data-frames="21" class="ep-btn" data-src="static/videos/planning_pose_s13.mp4" data-poster="static/videos/planning_pose_s13_poster.jpg" data-w="1600" data-h="1000">episode 2</button><button type="button" data-fps="4" data-frames="42" class="ep-btn" data-src="static/videos/planning_pose_s9.mp4" data-poster="static/videos/planning_pose_s9_poster.jpg" data-w="1600" data-h="1000">episode 3</button></div>
+        <video data-fps="4" data-frames="12" width="1600" height="1000" data-autoplay muted loop playsinline preload="metadata" poster="static/videos/planning_pose_s6_poster.jpg"><source src="static/videos/planning_pose_s6.mp4" type="video/mp4"></video>
         <div class="video-title">SE(2) pose push</div>
-        <div class="video-note">Every point reaches 3 cm of its posed target between windows 9 and 17 of the 40-window budget across the three episodes.</div>
+        <div class="video-note">A cylinder pushes the T-block to a commanded position <i>and</i> orientation. Every point reaches 3 cm of its posed target at window 8, 17 and 38 of the 40-window budget in the three episodes; the third converges late, which is what the spread over sixteen episodes looks like.</div>
       </div>
       <div class="video-card">
-        <div class="ep-select" title="Three episodes near the median of PointCast's error over the scored campaign"><button type="button" data-fps="4" data-frames="11" class="ep-btn" data-src="static/videos/planning_open_s10.mp4" data-poster="static/videos/planning_open_s10_poster.jpg" data-w="1600" data-h="1000">episode 1</button><button type="button" data-fps="4" data-frames="11" class="ep-btn is-active" data-src="static/videos/planning_open_s4.mp4" data-poster="static/videos/planning_open_s4_poster.jpg" data-w="1600" data-h="1000">episode 2</button><button type="button" data-fps="4" data-frames="11" class="ep-btn" data-src="static/videos/planning_open_s1.mp4" data-poster="static/videos/planning_open_s1_poster.jpg" data-w="1600" data-h="1000">episode 3</button></div>
-        <video data-fps="4" data-frames="11" width="1600" height="1000" data-autoplay muted loop playsinline preload="metadata" poster="static/videos/planning_open_s4_poster.jpg"><source src="static/videos/planning_open_s4.mp4" type="video/mp4"></video>
-        <div class="video-title">Articulated opening</div>
-        <div class="video-note">The door reaches its commanded opening within 0.05 rad between windows 3 and 7 of the 30-window budget across the three episodes.</div>
+        <div class="ep-select" title="The three episodes whose error on each stage is closest to that stage's median over the scored campaign"><button type="button" data-fps="4" data-frames="31" class="ep-btn is-active" data-src="static/videos/planning_seqopen_s9.mp4" data-poster="static/videos/planning_seqopen_s9_poster.jpg" data-w="1600" data-h="1000">episode 1</button><button type="button" data-fps="4" data-frames="24" class="ep-btn" data-src="static/videos/planning_seqopen_s11.mp4" data-poster="static/videos/planning_seqopen_s11_poster.jpg" data-w="1600" data-h="1000">episode 2</button><button type="button" data-fps="4" data-frames="42" class="ep-btn" data-src="static/videos/planning_seqopen_s8.mp4" data-poster="static/videos/planning_seqopen_s8_poster.jpg" data-w="1600" data-h="1000">episode 3</button></div>
+        <video data-fps="4" data-frames="31" width="1600" height="1000" data-autoplay muted loop playsinline preload="metadata" poster="static/videos/planning_seqopen_s9_poster.jpg"><source src="static/videos/planning_seqopen_s9.mp4" type="video/mp4"></video>
+        <div class="video-title">Sequential articulation</div>
+        <div class="video-note">Two of the cabinet's parts, in a sampled order: the first is driven to its commanded position, the tool lets go, crosses the cabinet face and takes the second handle, and both have to still be at their goals at the end. Both commanded parts carry the object colour and the uncommanded ones stay gray; a part has arrived when the green goal points sit on it. The release and the crossing are a fixed trajectory, identical for every model, so the models plan the stages rather than the sequence. Limitations below says why.</div>
       </div>
       <div class="video-card">
         <div class="ep-select" title="Three episodes near the median of PointCast's error over the scored campaign"><button type="button" data-fps="4" data-frames="10" class="ep-btn" data-src="static/videos/planning_cloth_s14.mp4" data-poster="static/videos/planning_cloth_s14_poster.jpg" data-w="1600" data-h="1000">episode 1</button><button type="button" data-fps="4" data-frames="10" class="ep-btn is-active" data-src="static/videos/planning_cloth_s8.mp4" data-poster="static/videos/planning_cloth_s8_poster.jpg" data-w="1600" data-h="1000">episode 2</button><button type="button" data-fps="4" data-frames="10" class="ep-btn" data-src="static/videos/planning_cloth_s13.mp4" data-poster="static/videos/planning_cloth_s13_poster.jpg" data-w="1600" data-h="1000">episode 3</button></div>
@@ -229,7 +229,7 @@
     </div>
 
     <h3 class="title is-4 has-text-centered" style="margin-top:2.5rem">Every arm on the same episode</h3>
-    <p class="section-lead">The same planner, cost, budget, seed and goal for every rollout model, only the model changes: random actions, AdaptiGraph, PGND, PTv3, ParticleFormer and PointCast, in Table V order. One frame per executed window, the full budget, one camera per task. A column is marked from the first window at which it meets the task's success rule. Illustrative re-runs of the scored configuration; the flow-matching arms draw unseeded noise, and a re-run is a different episode.</p>
+    <p class="section-lead">The same planner, cost, budget, seed and goal for every rollout model, only the model changes: random actions, AdaptiGraph, PGND, PTv3, ParticleFormer and PointCast, in the order every table on this page uses. One frame per executed window, the full budget, one camera per task. A column is marked from the first window at which it meets the task's success rule. Illustrative re-runs of the scored configuration; the flow-matching arms draw unseeded noise, and a re-run is a different episode.</p>
   </div>
   <div class="rollout-wide">
       <div class="rollout">
@@ -238,9 +238,9 @@
         <div class="rollout-note">Seed 7. PGND, ParticleFormer and PointCast bring every point within 3 cm; random, AdaptiGraph and PTv3 do not within the 40-window budget.</div>
       </div>
       <div class="rollout">
-        <video data-fps="4" data-frames="32" width="2400" height="416" data-autoplay muted loop playsinline preload="metadata" poster="static/videos/planning_compare_open_poster.jpg"><source src="static/videos/planning_compare_open.mp4" type="video/mp4"></video>
-        <div class="rollout-title">Articulated opening</div>
-        <div class="rollout-note">Seed 7. Every learned arm opens the door to within 0.05 rad; random does not.</div>
+        <video data-fps="4" data-frames="65" width="2400" height="440" data-autoplay muted loop playsinline preload="metadata" poster="static/videos/planning_compare_seqopen_poster.jpg"><source src="static/videos/planning_compare_seqopen.mp4" type="video/mp4"></video>
+        <div class="rollout-title">Sequential articulation</div>
+        <div class="rollout-note">Seed 2. The models take different numbers of windows, so each column carries its own phase and a column that has finished holds its last frame. The green marker means both commanded parts are inside their own thresholds at that frame: it can appear and then disappear if the first part is disturbed while the second is worked. Only ParticleFormer and PointCast finish this episode.</div>
       </div>
       <div class="rollout">
         <video data-fps="3" data-frames="21" width="2400" height="416" data-autoplay muted loop playsinline preload="metadata" poster="static/videos/planning_compare_cloth_poster.jpg"><source src="static/videos/planning_compare_cloth.mp4" type="video/mp4"></video>
@@ -285,8 +285,8 @@
         </div>
   </div>
   <div class="container is-max-desktop">
-    <h3 class="title is-4 has-text-centered" style="margin-top:2.5rem">The model does not start a push from rest</h3>
-    <p class="section-lead">PointCast plans the rope drag task and cannot start the rope push task. Placed at rest one centimetre behind a stationary rope, it predicts about 2 mm of motion for a push the simulator answers with 37 mm, so holding still looks as good as pushing and the planner never commits. Nothing in its rope push training data shows a visible tool beside a still rope: there the rope is already moving within one frame of the tool appearing, so the model learned to continue the motion it observes rather than to read the tool. The same behaviour appears in a checkpoint trained on identical data with a deterministic head, and it is unchanged across guidance scales, so this is a property of what the model was shown and not of how it samples. A model that ties motion to the tool instead of to the observed history does start the push. Repairing ours needs training data whose pushes begin before contact.</p>
+    <h3 class="title is-4 has-text-centered" style="margin-top:2.5rem">It cannot start a push from rest</h3>
+    <p class="section-lead">PointCast plans the rope <i>drag</i> task and cannot start the rope <i>push</i>. Placed at rest a centimetre behind a still rope, it predicts about 2 mm of motion where the simulator gives 37 mm, so holding still scores as well as pushing and the planner never commits. The cause is what it was shown, not how it samples: in our rope-push training episodes the rope is already moving within a frame of the tool appearing, so the model learned to continue the motion it sees rather than to read the tool. A model that ties motion to the tool does start the push, and a deterministic-head model trained on our data does not. Fixing ours needs training pushes that begin before contact.</p>
     <div class="video-grid">
 <div class="video-card">
           <video data-fps="4" data-frames="11" width="1600" height="1000" data-autoplay muted loop playsinline preload="metadata" poster="static/videos/planning_rope_s14_poster.jpg"><source src="static/videos/planning_rope_s14.mp4" type="video/mp4"></video>
@@ -300,8 +300,11 @@
         </div>
     </div>
 
-    <h3 class="title is-4 has-text-centered" style="margin-top:2.5rem">Where the benchmark saturates</h3>
-    <p class="section-lead">The planning tasks that carry an object to a goal are reached by every learned world model within the first few windows, so those rows separate the planner from the models rather than the models from each other. The SE(2) pose push is the one that discriminates, and below it the ordering is not stable: the planner's own re-run spread is 4.6% on push and 46.1% on the cabinet, so a single per-task cell is not a ranking.</p>
+    <h3 class="title is-4 has-text-centered" style="margin-top:2.5rem">Most planning tasks are too easy to rank models</h3>
+    <p class="section-lead">Every learned world model reaches the tasks that carry an object to a goal, most of them within the first few windows, so those rows measure the planner more than the model. The SE(2) push and the sequential articulation task are the two that separate them, and this is why the articulation task on this page commands two joints rather than one: the single-joint version put every model inside a centimetre, while the sequential one spreads the same five from 100% to 0%. Even so, a single per-task number is not a ranking. The planner is stochastic, and re-running one checkpoint on the same scenes moves its cabinet result by 46%.</p>
+
+    <h3 class="title is-4 has-text-centered" style="margin-top:2.5rem">A release is invisible in the state</h3>
+    <p class="section-lead">When the gripper lets go, nothing in a point set says so: points record where things are, not whether a grasp is closed. A retract then looks exactly like a pull, since either way the tool sits on the handle and moves outward. So immediately after a release the model keeps predicting that the part follows the tool, by about seven centimetres, and its one-window error rises roughly fivefold across the three windows that span the release before recovering. We measured this before building the sequential task, against a bar fixed in advance, and it failed. That is why the move between the two stages is a fixed trajectory rather than something a model is asked to predict.</p>
   </div>
 </section>
 
@@ -314,17 +317,63 @@
       <summary>Planning: the four-task table with its random-action floor</summary>
     <div class="table-wrap">
       <table class="paper-table is-wide">
-        <caption>Table V. Planning across four tasks</caption>
+        <caption>Planning across four tasks</caption>
         <thead><tr><th>Task</th><th>Metric</th><th>init</th><th>random</th><th>AdaptiGraph</th><th>PGND</th><th>PTv3</th><th>ParticleFormer</th><th>PointCast (ours)</th></tr></thead>
         <tbody>
           <tr><td>SE(2) pose push</td><td>per-point (cm)</td><td>&ndash;</td><td>12.61</td><td>11.17 [16.89]</td><td>4.79 [14.46]</td><td>2.75 [5.06]</td><td class="second">2.56 [4.14]</td><td class="best" style="background:var(--ours)">1.93 [3.22]</td></tr>
-          <tr><td>Articulated opening</td><td>part err (cm)</td><td>&ndash;</td><td>14.63</td><td>4.89 [15.00]</td><td>0.89 [1.36]</td><td>0.45 [1.06]</td><td class="best">0.21 [0.56]</td><td class="second" style="background:var(--ours)">0.41 [0.99]</td></tr>
+          <tr><td>Sequential articulation, first part</td><td>part err (cm)</td><td>&ndash;</td><td>18.32 [33.76]</td><td>7.97 [23.35]</td><td>2.25 [6.16]</td><td class="second">0.72 [1.52]</td><td>0.88 [1.41]</td><td class="best" style="background:var(--ours)">0.42 [0.67]</td></tr>
+          <tr><td>Sequential articulation, second part</td><td>part err (cm)</td><td>&ndash;</td><td>16.86 [30.45]</td><td>2.67 [3.27]</td><td class="best">0.38 [0.84]</td><td>0.97 [1.38]</td><td class="second">0.41 [0.93]</td><td class="best" style="background:var(--ours)">0.38 [0.97]</td></tr>
           <tr><td>Cloth drag</td><td>Chamfer (cm)</td><td>27.8</td><td>41.54</td><td>27.75 [53.26]</td><td>2.83 [4.07]</td><td>2.41 [3.06]</td><td class="best">2.08 [2.66]</td><td class="second" style="background:var(--ours)">2.09 [2.66]</td></tr>
           <tr><td>Rope drag</td><td>Chamfer (cm)</td><td>15.4</td><td>35.16</td><td>3.28 [3.96]</td><td class="second">1.91 [3.74]</td><td>5.87 [10.85]</td><td>2.16 [3.34]</td><td class="best" style="background:var(--ours)">1.71 [3.44]</td></tr>
         </tbody>
       </table>
     </div>
-        <p class="table-note">Mean final distance [p90] over 16 episodes per task; <i>init</i> is the starting distance, best in <b>bold</b>, second <u>underlined</u>. The 64 episodes are pooled, each distance divided by its median across models, and compared with a paired Wilcoxon test: PointCast is significantly better than PTv3 &mdash; in the pooled test and on three of the four tasks taken alone &mdash; and better than AdaptiGraph and the random floor on every task. It is not significantly different from ParticleFormer or PGND, and 16 episodes per task cannot show the models equal either.</p>
+        <p class="table-note">Mean final distance [p90] over 16 episodes per task; <i>init</i> is the starting distance, best in <b>bold</b>, second <u>underlined</u>. The sequential articulation task scores each commanded part against its own goal at the final frame and reports them separately, never pooled; its success column and the rest of its protocol are in the next table. The 64 episodes are pooled, each distance divided by its median across models, and compared with a paired Wilcoxon test: PointCast is significantly better than PTv3 &mdash; in the pooled test and on three of the four tasks taken alone &mdash; and better than AdaptiGraph and the random floor on every task. It is not significantly different from ParticleFormer or PGND, and 16 episodes per task cannot show the models equal either.</p>
+    </details>
+    <details class="extra">
+      <summary>Sequential articulation: the three scores, the door / drawer split, and the protocol</summary>
+      <div class="content has-text-justified">
+        <p>The task commands two of the two-to-four movable parts of a mixed cabinet, in a sampled order, over the same scenes and with the same per-part metric as the single-joint version it replaces, which commanded one part and which every learned model solved to inside a centimetre. A stage ends when its joint is inside its own threshold and has stopped moving, or at a budget of 30 windows. Between the stages the grasp is released, the tool retracts to a 10 cm standoff, crosses to the next handle and approaches it, over 15 frames that are the same for every model and that no model plans. Every model observes those frames, so each enters its second stage with a history that contains the tool arriving. Sixteen episodes, seeds 0 to 15, the checkpoints and inference settings of Table I, simulation only.</p>
+        <p>Doors are scored in radians against a 0.05 rad threshold and drawers in metres against 1.5 cm, so the pass criterion is type-normalized; the distances below are per-part point distances and are directly comparable within a column.</p>
+      </div>
+    <div class="table-wrap">
+      <table class="paper-table is-wide">
+        <caption>Sequential articulation, two commanded joints, 16 episodes</caption>
+        <thead><tr><th>Score</th><th>random</th><th>AdaptiGraph</th><th>PGND</th><th>PTv3</th><th>ParticleFormer</th><th>PointCast (ours)</th></tr></thead>
+        <tbody>
+          <tr><td>Sequence success</td><td>0%</td><td>12%</td><td>75%</td><td>75%</td><td class="second">88%</td><td class="best" style="background:var(--ours)">100%</td></tr>
+          <tr><td>Reached the first stage</td><td>0.06</td><td>0.25</td><td class="best">1.00</td><td>0.94</td><td>0.94</td><td class="best" style="background:var(--ours)">1.00</td></tr>
+          <tr><td>Reached the second stage</td><td>0.00</td><td>0.31</td><td class="best">1.00</td><td>0.88</td><td class="best">1.00</td><td class="best" style="background:var(--ours)">1.00</td></tr>
+          <tr><td>First part, end of sequence (cm)</td><td>18.32</td><td>7.97</td><td>2.25</td><td>0.72</td><td class="second">0.88</td><td class="best" style="background:var(--ours)">0.42</td></tr>
+          <tr><td>Second part, end of sequence (cm)</td><td>16.86</td><td>2.67</td><td class="best">0.38</td><td>0.97</td><td class="second">0.41</td><td class="best" style="background:var(--ours)">0.38</td></tr>
+          <tr><td>Planning cost (s / episode)</td><td>&ndash;</td><td>3.9</td><td>69.9</td><td>8.1</td><td>5.2</td><td class="best" style="background:var(--ours)">2.8</td></tr>
+        </tbody>
+      </table>
+    </div>
+      <p class="table-note">Three scores, reported side by side and never pooled into one: which stages were reached, how far every commanded part sits from its own goal at the final frame, and whether both are inside their thresholds simultaneously at the end. They disagree, which is why they are kept apart. PTv3 ends the first stage closer than ParticleFormer and still succeeds less often. PGND is the sharper case: it reaches both stages on all sixteen episodes, the only model besides ours to do so, and still loses four of them, because the first part moves afterwards. No pooled test is quoted for this task: dropping the single-joint version from the pool moves ours against ParticleFormer from p = 0.462 to 0.033, and it crosses 0.05 only because the one task where ParticleFormer led us left the pool.</p>
+      <div class="table-wrap">
+        <table class="paper-table">
+          <caption>End-of-sequence part error by joint type (cm)</caption>
+          <thead><tr><th>Model</th><th>First stage, door</th><th>First stage, drawer</th><th>Second stage, door</th><th>Second stage, drawer</th></tr></thead>
+          <tbody>
+            <tr><td>random</td><td>14.02</td><td>23.84</td><td>11.28</td><td>26.16</td></tr>
+            <tr><td>AdaptiGraph</td><td>4.63</td><td>12.26</td><td>3.40</td><td>1.46</td></tr>
+            <tr><td>PGND</td><td class="best">0.13</td><td>4.97</td><td class="best">0.16</td><td>0.74</td></tr>
+            <tr><td>PTv3</td><td>0.49</td><td>1.02</td><td>0.87</td><td>1.13</td></tr>
+            <tr><td>ParticleFormer</td><td>0.47</td><td>1.41</td><td>0.36</td><td class="best">0.49</td></tr>
+            <tr><td style="background:var(--ours)">PointCast (ours)</td><td style="background:var(--ours)">0.27</td><td class="best" style="background:var(--ours)">0.62</td><td style="background:var(--ours)">0.31</td><td style="background:var(--ours)">0.48</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="content has-text-justified">
+        <ul class="claims">
+          <li><strong>Drawers are harder than doors for every model</strong>, the one trend that holds across the whole table. Ours has the smallest gap between the two (0.27 against 0.62 cm on the first stage); ParticleFormer's first-stage drawer error is three times its door error and PGND's is thirty-eight times.</li>
+          <li><strong>PGND has the best door cells in the table and the worst drawer cell outside AdaptiGraph and the floor.</strong> All four of its lost episodes have a drawer as the first stage, and every one of its door first stages ends where it was put. In two of the four the stage used its entire 30-window budget, so the grasp opened while the drawer was still travelling and it coasted. The other two ended stopped and moved anyway; the obvious suspect is the tool touching the protruding drawer while it works the other joint, but nothing here measures that and it should not be written up as established.</li>
+          <li><strong>The first part staying put is scored, not assumed.</strong> Over the second stage it moves 0.03 cm on average for ours and 0.12 to 0.39 cm for ParticleFormer, PTv3 and AdaptiGraph, all far inside the 1.5 cm drawer threshold. PGND is the exception at 1.85 cm, and it is the one model whose success rate is not explained by which stages it reached.</li>
+          <li><strong>No model is given a brake.</strong> A scripted oracle needed one: its first version let go of parts still travelling at about 10 cm/s and lost five of sixteen episodes to the coast alone. The planned models choose every action, including the ones near the goal, so a model whose prediction carries the part's momentum can command the counter-pull itself. That is the capability this task is built to expose.</li>
+          <li><strong>Sixteen episodes, one scene distribution, and the planner is not reproducible run to run</strong> (its spread on a same-checkpoint re-run is 2.2% on the rope task, with no episode identical). The 100% to 0% spread on sequence success is far outside that; the sub-centimetre differences between the leading models are not.</li>
+        </ul>
+      </div>
     </details>
     <details class="extra">
       <summary>Additional ablation rows not printed in the paper</summary>
