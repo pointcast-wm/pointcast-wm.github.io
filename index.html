@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PointCast: One World Model for Rigid, Articulated, and Deformable Object Manipulation</title>
+  <meta name="description" content="PointCast is a point-set world model that spans rigid, articulated, and deformable manipulation. One architecture, one training recipe, and one checkpoint per regime cover rigid objects, cloth, rope, and multi-joint cabinets, and PointCast plans inside sampling-based MPC.">
+  <meta name="keywords" content="world model, robotic manipulation, point set, diffusion transformer, deformable objects, articulated objects, model-predictive control">
+  <meta name="robots" content="noindex, nofollow">
+  <!-- Open Graph: set og:url and an absolute og:image once the page URL exists. -->
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="PointCast: One World Model for Rigid, Articulated, and Deformable Object Manipulation">
+  <meta property="og:description" content="A point-set world model for rigid, articulated, and deformable manipulation, with one architecture, one recipe, and one checkpoint per regime.">
+  <meta property="og:image" content="static/videos/hero_sloth_poster.jpg">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='10' cy='12' r='5' fill='%23344096'/%3E%3Ccircle cx='22' cy='20' r='5' fill='%23bc3e98'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="static/css/bulma.min.css">
+  <link rel="stylesheet" href="static/css/index.css">
+</head>
+<body>
+
+<nav class="anchor-nav" aria-label="Sections">
+  <div class="container is-max-desktop">
+    <a href="#abstract">Abstract</a>
+    <a href="#method">Method</a>
+    <a href="#sim">Simulation</a>
+    <a href="#real">Real world</a>
+    <a href="#zeroshot">Zero-shot</a>
+    <a href="#planning">Planning</a>
+    <a href="#limitations">Limitations</a>
+    <a href="#supp">Supplementary</a>
+    <a href="#bibtex">BibTeX</a>
+  </div>
+</nav>
+
+<main id="main-content">
+
+<!-- ===================== header ===================== -->
+<section class="hero is-header">
+  <div class="hero-body">
+    <div class="container is-max-desktop has-text-centered">
+      <h1 class="title is-2 publication-title"><span class="method">PointCast</span>: One World Model for Rigid, Articulated, and Deformable Object Manipulation</h1>
+      <div class="is-size-5 publication-byline">
+        Anonymous Authors<br>
+        <span class="venue">Submission to the IEEE International Conference on Robotics and Automation (ICRA) 2027. Author information omitted for double-anonymous review.</span>
+      </div>
+      <div class="publication-links">
+        <!-- Replace each pending span with a link once the asset exists (see README). -->
+        <span class="button is-pending" title="The anonymized PDF will be linked here">
+          <span class="icon"><svg viewBox="0 0 24 24"><path d="M6 2h8l6 6v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm7 1.5V9h5.5L13 3.5zM8 13h8v1.5H8V13zm0 3h8v1.5H8V16z"/></svg></span>
+          <span>Paper (PDF, soon)</span>
+        </span>
+        <span class="button is-pending" title="An anonymized code mirror will be linked here">
+          <span class="icon"><svg viewBox="0 0 24 24"><path d="M9.4 16.6 4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0 4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg></span>
+          <span>Code (soon)</span>
+        </span>
+        <span class="button is-pending" title="The dataset release will be linked here">
+          <span class="icon"><svg viewBox="0 0 24 24"><path d="M12 3C7.6 3 4 4.6 4 6.5S7.6 10 12 10s8-1.6 8-3.5S16.4 3 12 3zm-8 6v3c0 1.9 3.6 3.5 8 3.5s8-1.6 8-3.5V9c0 1.9-3.6 3.5-8 3.5S4 10.9 4 9zm0 5.5v3c0 1.9 3.6 3.5 8 3.5s8-1.6 8-3.5v-3c0 1.9-3.6 3.5-8 3.5s-8-1.6-8-3.5z"/></svg></span>
+          <span>Dataset (soon)</span>
+        </span>
+        <a href="#planning" class="button">
+          <span class="icon"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7L8 5z"/></svg></span>
+          <span>Videos</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== abstract ===================== -->
+<section class="section is-alt" id="abstract">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">Abstract</h2>
+    <div class="content has-text-justified">
+      <p>World models are useful for robotic manipulation because a robot that can predict how a commanded end-effector motion moves an object can plan that motion before executing it. We present PointCast, a point-set world model that spans rigid, articulated, and deformable manipulation. The state is a persistent set of 3D points on the end-effector and the object. It is mesh-free, topology-agnostic, and cheaper to predict than pixels. Because every point is supervised individually, the model learns where material goes rather than what the cloud looks like. A diffusion transformer denoises a short window of future point positions, conditioned on the points' recent history and the commanded end-effector motion. Its attention alternates between local and global, and cross-attention to the end-effector carries the coupling that other models build by hand. One architecture at 19.8M parameters, one training recipe, and one checkpoint per regime cover rigid objects, cloth, rope, and multi-joint cabinets. Trained on randomized simulation and scored against four baselines under one evaluation protocol, it is best on three of four regimes and second on rigid. Trained on the PGND benchmark's own robot episodes, it has the best mean in four of six categories, is statistically comparable to the best in the other two, and improves on PGND in all six. Frozen inside sampling-based model-predictive control at one network evaluation per window, it succeeds on 97.5% of 80 episodes over five simulated tasks, comparable to ParticleFormer and PGND and significantly better than PTv3 and AdaptiGraph.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== method ===================== -->
+<section class="section" id="method">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">Method</h2>
+    <p class="section-lead">The state is a persistent set of 3D points on the object and on the end-effector. A diffusion transformer denoises the next window of point positions from their recent history and the commanded end-effector motion, and one architecture with one training recipe covers rigid, articulated, and deformable objects.</p>
+  </div>
+  <div class="method-wide">
+    <figure class="paper-figure method-figure">
+      <img src="static/images/fig2_pipeline.png" width="2800" height="1387" alt="PointCast pipeline, left to right: a real cloth state with object points and end-effector points, the per-point tokens, the stack of eight DiT blocks with kNN-local attention, global attention with registers, cross-attention to actors and a feed-forward layer, the one-step flow from noise to the clean window, and the autoregressive rollout.">
+      <figcaption><b>PointCast, left to right.</b> Object points (<span class="legend-dot object"></span>indigo), end-effector points (<span class="legend-dot actor"></span>magenta, the actor tokens) and eight registers enter as per-point tokens. Local and global self-attention alternate across the eight blocks, every block also cross-attends to the actor tokens, and one Euler step returns the clean window from noise, the setting every rollout on this page uses. The predicted window is appended to the history and the model is re-conditioned for the next one. The state is a real cloth episode from the PGND benchmark. This is Fig. 2 of the paper.</figcaption>
+    </figure>
+  </div>
+  <div class="container is-max-desktop">
+    <figure class="paper-figure method-figure">
+      <img src="static/images/fig3_attention.png" width="2100" height="852" alt="The three attention patterns of one block drawn on the same real cloth state: kNN-local attention from a red query point to its neighbours inside a green disc, global attention from one gold register token to every object point, and cross-attention from the red query point to the magenta end-effector points on the two grippers.">
+      <figcaption><b>The three attention patterns of a block, on the same state.</b> kNN-local attention restricts a query point (red) to its sixteen nearest neighbours. Global attention is drawn from one of the eight register tokens (gold), which attend to every object token. Cross-attention reads the actor tokens (magenta, on the two grippers), which is how the model learns the coupling between the end-effector and the material. This is Fig. 3 of the paper.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ===================== simulation ===================== -->
+<section class="section is-alt" id="sim">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">Simulation rollouts</h2>
+    <p class="section-lead">Three held-out interactions per regime, every frame of the free-running rollout. Columns in Table I order, ground truth rightmost. Ground truth in <span class="legend-dot object"></span>blue, predictions in <span class="legend-dot pred"></span>orange, the end-effector in <span class="legend-dot actor"></span>magenta, the cabinet's actuated part in gold. History frames, the conditioning every model receives, are identical in every column and labelled. Each card offers three interactions from the middle of the distribution: the paper's pick, which sits at the median of PointCast's error over the evaluation pool and is shown second, and its two nearest neighbours in that ranking. The hardest tenth of each pool is in the Limitations section.</p>
+  </div>
+    <div class="rollout-wide">
+      <div class="rollout">
+        <div class="ep-select" title="Three episodes near the median of PointCast's error over the evaluation pool; the middle one is the episode the paper's gallery shows"><button type="button" data-fps="9" data-frames="70" class="ep-btn" data-src="static/videos/sim_rigid_p45.mp4" data-poster="static/videos/sim_rigid_p45_poster.jpg" data-w="2400" data-h="328">episode 1</button><button type="button" data-fps="10" data-frames="79" class="ep-btn is-active" data-src="static/videos/sim_rigid.mp4" data-poster="static/videos/sim_rigid_poster.jpg" data-w="2400" data-h="428">episode 2</button><button type="button" data-fps="8" data-frames="61" class="ep-btn" data-src="static/videos/sim_rigid_p55.mp4" data-poster="static/videos/sim_rigid_p55_poster.jpg" data-w="2400" data-h="288">episode 3</button></div>
+        <video data-fps="10" data-frames="79" width="2400" height="428" data-autoplay muted loop playsinline preload="metadata" poster="static/videos/sim_rigid_poster.jpg"><source src="static/videos/sim_rigid.mp4" type="video/mp4"></video>
+        <div class="rollout-title">Rigid (push)</div>
+        <div class="rollout-note">79 frames, predicted from frame 5. The pusher retracts after the push; the object should stay put.</div>
+      </div>
+      <div class="rollout">
+        <div class="ep-select" title="Three episodes near the median of PointCast's error over the evaluation pool; the middle one is the episode the paper's gallery shows"><button type="button" data-fps="4" data-frames="29" class="ep-btn" data-src="static/videos/sim_cloth_p45.mp4" data-poster="static/videos/sim_cloth_p45_poster.jpg" data-w="2400" data-h="358">episode 1</button><button type="button" data-fps="4" data-frames="29" class="ep-btn is-active" data-src="static/videos/sim_cloth.mp4" data-poster="static/videos/sim_cloth_poster.jpg" data-w="2400" data-h="350">episode 2</button><button type="button" data-fps="4" data-frames="29" class="ep-btn" data-src="static/videos/sim_cloth_p55.mp4" data-poster="static/videos/sim_cloth_p55_poster.jpg" data-w="2400" data-h="294">episode 3</button></div>
+        <video data-fps="4" data-frames="29" width="2400" height="350" data-autoplay muted loop playsinline preload="metadata" poster="static/videos/sim_cloth_poster.jpg"><source src="static/videos/sim_cloth.mp4" type="video/mp4"></video>
+        <div class="rollout-title">Cloth (lift)</div>
+        <div class="rollout-note">29 frames at stride 4, predicted from frame 20. AdaptiGraph's rollout is matched by its displacement curve, as in the paper's gallery.</div>
+      </div>
+      <div class="rollout">
+        <div class="ep-select" title="Three episodes near the median of PointCast's error over the evaluation pool; the middle one is the episode the paper's gallery shows"><button type="button" data-fps="3" data-frames="18" class="ep-btn" data-src="static/videos/sim_rope_p40.mp4" data-poster="static/videos/sim_rope_p40_poster.jpg" data-w="2250" data-h="470">episode 1</button><button type="button" data-fps="3" data-frames="18" class="ep-btn is-active" data-src="static/videos/sim_rope.mp4" data-poster="static/videos/sim_rope_poster.jpg" data-w="2400" data-h="356">episode 2</button><button type="button" data-fps="3" data-frames="18" class="ep-btn" data-src="static/videos/sim_rope_p55.mp4" data-poster="static/videos/sim_rope_p55_poster.jpg" data-w="2400" data-h="340">episode 3</button></div>
+        <video data-fps="3" data-frames="18" width="2400" height="356" data-autoplay muted loop playsinline preload="metadata" poster="static/videos/sim_rope_poster.jpg"><source src="static/videos/sim_rope.mp4" type="video/mp4"></video>
+        <div class="rollout-title">Rope (push)</div>
+        <div class="rollout-note">18 frames at stride 4, predicted from frame 20. The pusher is dropped from the drawing once it has slid off the rope.</div>
+      </div>
+      <div class="rollout">
+        <div class="ep-select" title="Three episodes near the median of PointCast's error over the evaluation pool; the middle one is the episode the paper's gallery shows"><button type="button" data-fps="5" data-frames="40" class="ep-btn" data-src="static/videos/sim_cabinet_p40.mp4" data-poster="static/videos/sim_cabinet_p40_poster.jpg" data-w="2400" data-h="518">episode 1</button><button type="button" data-fps="4" data-frames="36" class="ep-btn is-active" data-src="static/videos/sim_cabinet.mp4" data-poster="static/videos/sim_cabinet_poster.jpg" data-w="2400" data-h="522">episode 2</button><button type="button" data-fps="5" data-frames="40" class="ep-btn" data-src="static/videos/sim_cabinet_p55.mp4" data-poster="static/videos/sim_cabinet_p55_poster.jpg" data-w="2400" data-h="518">episode 3</button></div>
+        <video data-fps="4" data-frames="36" width="2400" height="522" data-autoplay muted loop playsinline preload="metadata" poster="static/videos/sim_cabinet_poster.jpg"><source src="static/videos/sim_cabinet.mp4" type="video/mp4"></video>
+        <div class="rollout-title">Cabinet (open)</div>
+        <div class="rollout-note">36 frames, predicted from frame 5. The actuated door in gold; the wireframe is the carcass bounding box.</div>
+      </div>
+    </div>
+</section>
+
+<!-- ===================== real world ===================== -->
+<section class="section" id="real">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">Real-world rollouts</h2>
+    <p class="section-lead">Three test episodes per PGND-benchmark category, all 40 frames each. Ground truth is the photograph; every prediction column is the episode's pre-interaction Gaussian splat advected by that method's predicted point motion, the end-effector marked in <span class="legend-dot actor"></span>magenta. Rope and box appear here beyond the four categories the paper shows. Each card offers three episodes from the middle of the distribution: the paper's pick, which sits at the median of PointCast's step-30 error over the category and is shown second, and its two nearest usable neighbours in that ranking. The hardest tenth of each category is in the Limitations section. Photographs and splats from the PGND release.</p>
+  </div>
+    <div class="rollout-wide">
+      <div class="rollout">
+        <div class="ep-select" title="Three episodes near the median of PointCast's error over the evaluation pool; the middle one is the episode the paper's gallery shows"><button type="button" data-fps="5" data-frames="40" class="ep-btn" data-src="static/videos/real_cloth_t2.mp4" data-poster="static/videos/real_cloth_t2_poster.jpg" data-w="2400" data-h="600">episode 1</button><button type="button" data-fps="5" data-frames="40" class="ep-btn is-active" data-src="static/videos/real_cloth.mp4" data-poster="static/videos/real_cloth_poster.jpg" data-w="2400" data-h="514">episode 2</button><button type="button" data-fps="5" data-frames="40" class="ep-btn" data-src="static/videos/real_cloth_t1.mp4" data-poster="static/videos/real_cloth_t1_poster.jpg" data-w="2400" data-h="530">episode 3</button></div>
+        <video data-fps="5" data-frames="40" width="2400" height="514" data-autoplay muted loop playsinline preload="metadata" poster="static/videos/real_cloth_poster.jpg"><source src="static/videos/real_cloth.mp4" type="video/mp4"></video>
+        <div class="rollout-title">Cloth</div>
+        <div class="rollout-note">A bimanual fold; both grippers are marked.</div>
+      </div>
+      <div class="rollout">
+        <div class="ep-select" title="Three episodes near the median of PointCast's error over the evaluation pool; the middle one is the episode the paper's gallery shows"><button type="button" data-fps="5" data-frames="40" class="ep-btn" data-src="static/videos/real_rope_t2.mp4" data-poster="static/videos/real_rope_t2_poster.jpg" data-w="2400" data-h="582">episode 1</button><button type="button" data-fps="5" data-frames="40" class="ep-btn is-active" data-src="static/videos/real_rope.mp4" data-poster="static/videos/real_rope_poster.jpg" data-w="2400" data-h="582">episode 2</button><button type="button" data-fps="5" data-frames="40" class="ep-btn" data-src="static/videos/real_rope_t1.mp4" data-poster="static/videos/real_rope_t1_poster.jpg" data-w="2400" data-h="542">episode 3</button></div>
+        <video data-fps="5" data-frames="40" width="2400" height="582" data-autoplay muted loop playsinline preload="metadata" poster="static/videos/real_rope_poster.jpg"><source src="static/videos/real_rope.mp4" type="video/mp4"></video>
+        <div class="rollout-title">Rope</div>
+        <div class="rollout-note">AdaptiGraph's motion gate opens at frame 27 of 39; its column holds the rest state before that.</div>
+      </div>
+      <div class="rollout">
+        <div class="ep-select" title="Three episodes near the median of PointCast's error over the evaluation pool; the middle one is the episode the paper's gallery shows"><button type="button" data-fps="5" data-frames="40" class="ep-btn" data-src="static/videos/real_box_t1.mp4" data-poster="static/videos/real_box_t1_poster.jpg" data-w="2400" data-h="350">episode 1</button><button type="button" data-fps="5" data-frames="40" class="ep-btn is-active" data-src="static/videos/real_box.mp4" data-poster="static/videos/real_box_poster.jpg" data-w="2400" data-h="316">episode 2</button><button type="button" data-fps="5" data-frames="40" class="ep-btn" data-src="static/videos/real_box_t2.mp4" data-poster="static/videos/real_box_t2_poster.jpg" data-w="2400" data-h="416">episode 3</button></div>
+        <video data-fps="5" data-frames="40" width="2400" height="316" data-autoplay muted loop playsinline preload="metadata" poster="static/videos/real_box_poster.jpg"><source src="static/videos/real_box.mp4" type="video/mp4"></video>
+        <div class="rollout-title">Box</div>
+        <div class="rollout-note">A rigid push; the crop excludes the operator visible above the box.</div>
+      </div>
+      <div class="rollout">
+        <div class="ep-select" title="Three episodes near the median of PointCast's error over the evaluation pool; the middle one is the episode the paper's gallery shows"><button type="button" data-fps="5" data-frames="40" class="ep-btn" data-src="static/videos/real_bread_t1.mp4" data-poster="static/videos/real_bread_t1_poster.jpg" data-w="2400" data-h="320">episode 1</button><button type="button" data-fps="5" data-frames="40" class="ep-btn is-active" data-src="static/videos/real_bread.mp4" data-poster="static/videos/real_bread_poster.jpg" data-w="2400" data-h="320">episode 2</button><button type="button" data-fps="5" data-frames="40" class="ep-btn" data-src="static/videos/real_bread_t2.mp4" data-poster="static/videos/real_bread_t2_poster.jpg" data-w="2400" data-h="348">episode 3</button></div>
+        <video data-fps="5" data-frames="40" width="2400" height="320" data-autoplay muted loop playsinline preload="metadata" poster="static/videos/real_bread_poster.jpg"><source src="static/videos/real_bread.mp4" type="video/mp4"></video>
+        <div class="rollout-title">Bread</div>
+        <div class="rollout-note">PGND's particle subset holds 500 points on this category.</div>
+      </div>
+      <div class="rollout">
+        <div class="ep-select" title="Three episodes near the median of PointCast's error over the evaluation pool; the middle one is the episode the paper's gallery shows"><button type="button" data-fps="5" data-frames="40" class="ep-btn" data-src="static/videos/real_paperbag_t1.mp4" data-poster="static/videos/real_paperbag_t1_poster.jpg" data-w="2400" data-h="542">episode 1</button><button type="button" data-fps="5" data-frames="40" class="ep-btn is-active" data-src="static/videos/real_paperbag.mp4" data-poster="static/videos/real_paperbag_poster.jpg" data-w="2400" data-h="542">episode 2</button><button type="button" data-fps="5" data-frames="40" class="ep-btn" data-src="static/videos/real_paperbag_t2.mp4" data-poster="static/videos/real_paperbag_t2_poster.jpg" data-w="2400" data-h="568">episode 3</button></div>
+        <video data-fps="5" data-frames="40" width="2400" height="542" data-autoplay muted loop playsinline preload="metadata" poster="static/videos/real_paperbag_poster.jpg"><source src="static/videos/real_paperbag.mp4" type="video/mp4"></video>
+        <div class="rollout-title">Paper bag</div>
+        <div class="rollout-note">AdaptiGraph's rollout ends at frame 16 of 39 and its column holds that prediction afterwards.</div>
+      </div>
+      <div class="rollout">
+        <div class="ep-select" title="Three episodes near the median of PointCast's error over the evaluation pool; the middle one is the episode the paper's gallery shows"><button type="button" data-fps="5" data-frames="40" class="ep-btn" data-src="static/videos/real_sloth_t1.mp4" data-poster="static/videos/real_sloth_t1_poster.jpg" data-w="2400" data-h="538">episode 1</button><button type="button" data-fps="5" data-frames="40" class="ep-btn is-active" data-src="static/videos/real_sloth.mp4" data-poster="static/videos/real_sloth_poster.jpg" data-w="2400" data-h="538">episode 2</button><button type="button" data-fps="5" data-frames="40" class="ep-btn" data-src="static/videos/real_sloth_t2.mp4" data-poster="static/videos/real_sloth_t2_poster.jpg" data-w="2400" data-h="526">episode 3</button></div>
+        <video data-fps="5" data-frames="40" width="2400" height="538" data-autoplay muted loop playsinline preload="metadata" poster="static/videos/real_sloth_poster.jpg"><source src="static/videos/real_sloth.mp4" type="video/mp4"></video>
+        <div class="rollout-title">Plush (sloth)</div>
+        <div class="rollout-note">The episode of the page header.</div>
+      </div>
+    </div>
+</section>
+
+<!-- ===================== zero-shot ===================== -->
+<section class="section is-alt" id="zeroshot">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">Zero-shot rollouts</h2>
+    <p class="section-lead">The four windows of the paper's zero-shot gallery, every frame, simulation checkpoints applied to real captures with no real training data. Push-T and Franka are point renders with the pool's actor points; rope and cloth are splats with the photograph as ground truth and the recorded end-effector drawn. On the cloth capture the tracked ground truth never leaves the table while the photograph shows the cloth lifted, and every method is scored against those tracks. Push-T and Franka offer three windows from the middle of the distribution, the paper's pick and its two nearest neighbours in PointCast's error ranking; rope and cloth offer the one window their photograph registration covers. The hardest tenth of the two point-rendered captures is in the Limitations section.</p>
+  </div>
+    <div class="rollout-wide">
+      <div class="rollout">
+        <div class="ep-select" title="Three episodes near the median of PointCast's error over the evaluation pool; the middle one is the episode the paper's gallery shows"><button type="button" data-fps="7" data-frames="54" class="ep-btn" data-src="static/videos/zeroshot_pusht_p45.mp4" data-poster="static/videos/zeroshot_pusht_p45_poster.jpg" data-w="2400" data-h="514">window 1</button><button type="button" data-fps="3" data-frames="27" class="ep-btn is-active" data-src="static/videos/zeroshot_pusht.mp4" data-poster="static/videos/zeroshot_pusht_poster.jpg" data-w="2400" data-h="592">window 2</button><button type="button" data-fps="4" data-frames="29" class="ep-btn" data-src="static/videos/zeroshot_pusht_p55.mp4" data-poster="static/videos/zeroshot_pusht_p55_poster.jpg" data-w="2400" data-h="680">window 3</button></div>
+        <video data-fps="3" data-frames="27" width="2400" height="592" data-autoplay muted loop playsinline preload="metadata" poster="static/videos/zeroshot_pusht_poster.jpg"><source src="static/videos/zeroshot_pusht.mp4" type="video/mp4"></video>
+        <div class="rollout-title">Push-T replay</div>
+        <div class="rollout-note">A simulator replay with exact pusher geometry, viewed from above; predicted from frame 5.</div>
+      </div>
+      <div class="rollout">
+        <div class="ep-select" title="Three episodes near the median of PointCast's error over the evaluation pool; the middle one is the episode the paper's gallery shows"><button type="button" data-fps="7" data-frames="59" class="ep-btn" data-src="static/videos/zeroshot_franka_dt_p45.mp4" data-poster="static/videos/zeroshot_franka_dt_p45_poster.jpg" data-w="2400" data-h="622">window 1</button><button type="button" data-fps="9" data-frames="70" class="ep-btn is-active" data-src="static/videos/zeroshot_franka_dt.mp4" data-poster="static/videos/zeroshot_franka_dt_poster.jpg" data-w="2400" data-h="616">window 2</button><button type="button" data-fps="6" data-frames="49" class="ep-btn" data-src="static/videos/zeroshot_franka_dt_p55.mp4" data-poster="static/videos/zeroshot_franka_dt_p55_poster.jpg" data-w="2400" data-h="666">window 3</button></div>
+        <video data-fps="9" data-frames="70" width="2400" height="616" data-autoplay muted loop playsinline preload="metadata" poster="static/videos/zeroshot_franka_dt_poster.jpg"><source src="static/videos/zeroshot_franka_dt.mp4" type="video/mp4"></video>
+        <div class="rollout-title">Franka blocks</div>
+        <div class="rollout-note">A push on a table; predicted from frame 10 at stride 2. The end-effector arrives, pushes, and retracts.</div>
+      </div>
+      <div class="rollout">
+        <video data-fps="3" data-frames="14" width="2400" height="330" data-autoplay muted loop playsinline preload="metadata" poster="static/videos/zeroshot_rope_dt_poster.jpg"><source src="static/videos/zeroshot_rope_dt.mp4" type="video/mp4"></video>
+        <div class="rollout-title">Rope</div>
+        <div class="rollout-note">A rod pushes the rope; the stick is the recorded end-effector from flange to tip. The tracked ground truth covers part of the rope.</div>
+      </div>
+      <div class="rollout">
+        <video data-fps="3" data-frames="13" width="2400" height="378" data-autoplay muted loop playsinline preload="metadata" poster="static/videos/zeroshot_cloth_poster.jpg"><source src="static/videos/zeroshot_cloth.mp4" type="video/mp4"></video>
+        <div class="rollout-title">Cloth</div>
+        <div class="rollout-note">A grasp lift; the closed two-finger template is posed at the recorded tip. The tracked ground truth leaves the lifted region at table height.</div>
+      </div>
+    </div>
+</section>
+
+<!-- ===================== planning ===================== -->
+<section class="section" id="planning">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">Planning with the world model</h2>
+    <p class="section-lead">PointCast frozen inside sampling-based MPC, one network evaluation per window. Three episodes per task, re-rendered from the stored simulator states: <span class="legend-dot object"></span>object, <span class="legend-dot goal"></span>goal point set, <span class="legend-dot actor"></span>end-effector with its executed path. One frame per executed window. The three seeds are those whose scored episodes sit closest to the median of PointCast's error over the campaign, and the clips are fresh re-runs of those seeds: the planner draws unseeded noise, so a re-run is a different episode from the scored one. Each clip ends three windows after the task's success criterion is first met; the scored run continues to its fixed budget. The pose card offers a fourth clip, the episode the paper's planning figure shows, replayed at every simulator frame rather than one frame per window.</p>
+    <div class="video-grid">
+      <div class="video-card">
+        <div class="ep-select" title="Three episodes near the median of PointCast's error over the scored campaign, plus the same episode the paper's planning figure shows, replayed frame by frame"><button type="button" data-fps="4" data-frames="21" class="ep-btn" data-src="static/videos/planning_pose_s13.mp4" data-poster="static/videos/planning_pose_s13_poster.jpg" data-w="1600" data-h="1000">episode 1</button><button type="button" data-fps="4" data-frames="13" class="ep-btn is-active" data-src="static/videos/planning_pose_s11.mp4" data-poster="static/videos/planning_pose_s11_poster.jpg" data-w="1600" data-h="1000">episode 2</button><button type="button" data-fps="4" data-frames="13" class="ep-btn" data-src="static/videos/planning_pose_s6.mp4" data-poster="static/videos/planning_pose_s6_poster.jpg" data-w="1600" data-h="1000">episode 3</button><button type="button" data-fps="30" data-frames="118" class="ep-btn" data-src="static/videos/planning_pose.mp4" data-poster="static/videos/planning_pose_poster.jpg" data-w="1600" data-h="1000">frame by frame</button></div>
+        <video data-fps="4" data-frames="13" width="1600" height="1000" data-autoplay muted loop playsinline preload="metadata" poster="static/videos/planning_pose_s11_poster.jpg"><source src="static/videos/planning_pose_s11.mp4" type="video/mp4"></video>
+        <div class="video-title">SE(2) pose push</div>
+        <div class="video-note">Every point reaches 3 cm of its posed target between windows 9 and 17 of the 40-window budget across the three episodes. The fourth clip replays one episode at every simulator frame.</div>
+      </div>
+      <div class="video-card">
+        <div class="ep-select" title="Three episodes near the median of PointCast's error over the scored campaign, plus the same episode the paper's planning figure shows, replayed frame by frame"><button type="button" data-fps="4" data-frames="11" class="ep-btn" data-src="static/videos/planning_open_s10.mp4" data-poster="static/videos/planning_open_s10_poster.jpg" data-w="1600" data-h="1000">episode 1</button><button type="button" data-fps="4" data-frames="11" class="ep-btn is-active" data-src="static/videos/planning_open_s4.mp4" data-poster="static/videos/planning_open_s4_poster.jpg" data-w="1600" data-h="1000">episode 2</button><button type="button" data-fps="4" data-frames="11" class="ep-btn" data-src="static/videos/planning_open_s1.mp4" data-poster="static/videos/planning_open_s1_poster.jpg" data-w="1600" data-h="1000">episode 3</button></div>
+        <video data-fps="4" data-frames="11" width="1600" height="1000" data-autoplay muted loop playsinline preload="metadata" poster="static/videos/planning_open_s4_poster.jpg"><source src="static/videos/planning_open_s4.mp4" type="video/mp4"></video>
+        <div class="video-title">Articulated opening</div>
+        <div class="video-note">The door reaches its commanded opening within 0.05 rad between windows 3 and 7 of the 30-window budget across the three episodes.</div>
+      </div>
+      <div class="video-card">
+        <div class="ep-select" title="Three episodes near the median of PointCast's error over the scored campaign, plus the same episode the paper's planning figure shows, replayed frame by frame"><button type="button" data-fps="4" data-frames="10" class="ep-btn" data-src="static/videos/planning_cloth_s14.mp4" data-poster="static/videos/planning_cloth_s14_poster.jpg" data-w="1600" data-h="1000">episode 1</button><button type="button" data-fps="4" data-frames="10" class="ep-btn is-active" data-src="static/videos/planning_cloth_s8.mp4" data-poster="static/videos/planning_cloth_s8_poster.jpg" data-w="1600" data-h="1000">episode 2</button><button type="button" data-fps="4" data-frames="10" class="ep-btn" data-src="static/videos/planning_cloth_s13.mp4" data-poster="static/videos/planning_cloth_s13_poster.jpg" data-w="1600" data-h="1000">episode 3</button></div>
+        <video data-fps="4" data-frames="10" width="1600" height="1000" data-autoplay muted loop playsinline preload="metadata" poster="static/videos/planning_cloth_s8_poster.jpg"><source src="static/videos/planning_cloth_s8.mp4" type="video/mp4"></video>
+        <div class="video-title">Cloth drag</div>
+        <div class="video-note">After the scripted grasp, the Chamfer distance to the target halves at window 2 of the 18-window budget in all three episodes.</div>
+      </div>
+      <div class="video-card">
+        <div class="ep-select" title="Three episodes near the median of PointCast's error over the scored campaign, plus the same episode the paper's planning figure shows, replayed frame by frame"><button type="button" data-fps="4" data-frames="11" class="ep-btn" data-src="static/videos/planning_rope_s14.mp4" data-poster="static/videos/planning_rope_s14_poster.jpg" data-w="1600" data-h="1000">episode 1</button><button type="button" data-fps="4" data-frames="11" class="ep-btn is-active" data-src="static/videos/planning_rope_s5.mp4" data-poster="static/videos/planning_rope_s5_poster.jpg" data-w="1600" data-h="1000">episode 2</button><button type="button" data-fps="4" data-frames="11" class="ep-btn" data-src="static/videos/planning_rope_s8.mp4" data-poster="static/videos/planning_rope_s8_poster.jpg" data-w="1600" data-h="1000">episode 3</button></div>
+        <video data-fps="4" data-frames="11" width="1600" height="1000" data-autoplay muted loop playsinline preload="metadata" poster="static/videos/planning_rope_s5_poster.jpg"><source src="static/videos/planning_rope_s5.mp4" type="video/mp4"></video>
+        <div class="video-title">Rope drag</div>
+        <div class="video-note">After the scripted grasp, the Chamfer distance to the target halves at window 1 or 2 of the 18-window budget across the three episodes.</div>
+      </div>
+    </div>
+
+    <h3 class="title is-4 has-text-centered" style="margin-top:2.5rem">Every arm on the same episode</h3>
+    <p class="section-lead">The same planner, cost, budget, seed and goal for every rollout model, only the model changes: random actions, AdaptiGraph, PGND, PTv3, ParticleFormer and PointCast, in Table V order. One frame per executed window, the full budget, one camera per task. A column is marked from the first window at which it meets the task's success rule. Illustrative re-runs of the scored configuration; the flow-matching arms draw unseeded noise, and a re-run is a different episode.</p>
+  </div>
+  <div class="rollout-wide">
+      <div class="rollout">
+        <video data-fps="5" data-frames="42" width="2400" height="416" data-autoplay muted loop playsinline preload="metadata" poster="static/videos/planning_compare_pose_poster.jpg"><source src="static/videos/planning_compare_pose.mp4" type="video/mp4"></video>
+        <div class="rollout-title">SE(2) pose push</div>
+        <div class="rollout-note">Seed 7. PGND, ParticleFormer and PointCast bring every point within 3 cm; random, AdaptiGraph and PTv3 do not within the 40-window budget.</div>
+      </div>
+      <div class="rollout">
+        <video data-fps="4" data-frames="32" width="2400" height="416" data-autoplay muted loop playsinline preload="metadata" poster="static/videos/planning_compare_open_poster.jpg"><source src="static/videos/planning_compare_open.mp4" type="video/mp4"></video>
+        <div class="rollout-title">Articulated opening</div>
+        <div class="rollout-note">Seed 7. Every learned arm opens the door to within 0.05 rad; random does not.</div>
+      </div>
+      <div class="rollout">
+        <video data-fps="3" data-frames="21" width="2400" height="416" data-autoplay muted loop playsinline preload="metadata" poster="static/videos/planning_compare_cloth_poster.jpg"><source src="static/videos/planning_compare_cloth.mp4" type="video/mp4"></video>
+        <div class="rollout-title">Cloth drag</div>
+        <div class="rollout-note">Seed 14. Every arm except AdaptiGraph halves the Chamfer distance to the target; AdaptiGraph's predicted cloth barely moves.</div>
+      </div>
+      <div class="rollout">
+        <video data-fps="3" data-frames="21" width="2400" height="416" data-autoplay muted loop playsinline preload="metadata" poster="static/videos/planning_compare_rope_poster.jpg"><source src="static/videos/planning_compare_rope.mp4" type="video/mp4"></video>
+        <div class="rollout-title">Rope drag</div>
+        <div class="rollout-note">Seed 14. Every arm except random halves the Chamfer distance to the target.</div>
+      </div>
+  </div>
+  <div class="container is-max-desktop">
+  </div>
+</section>
+
+
+<!-- ===================== limitations ===================== -->
+<section class="section is-alt" id="limitations">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">Limitations</h2>
+    <p class="section-lead">Where the model is weak, shown the same way as everything else on this page. The clips below are the hardest tenth of each evaluation pool, and a task the model does not begin at all.</p>
+  </div>
+  <div class="rollout-wide">
+        <div class="rollout">
+          <div class="ep-select" title="The worst-decile episode of each simulated regime"><button type="button" data-fps="9" data-frames="75" class="ep-btn is-active" data-src="static/videos/sim_rigid_p90.mp4" data-poster="static/videos/sim_rigid_p90_poster.jpg" data-w="2400" data-h="350">rigid</button><button type="button" data-fps="4" data-frames="29" class="ep-btn" data-src="static/videos/sim_cloth_p90.mp4" data-poster="static/videos/sim_cloth_p90_poster.jpg" data-w="2400" data-h="416">cloth</button><button type="button" data-fps="3" data-frames="18" class="ep-btn" data-src="static/videos/sim_rope_p90.mp4" data-poster="static/videos/sim_rope_p90_poster.jpg" data-w="2400" data-h="354">rope</button><button type="button" data-fps="5" data-frames="40" class="ep-btn" data-src="static/videos/sim_cabinet_p90.mp4" data-poster="static/videos/sim_cabinet_p90_poster.jpg" data-w="2400" data-h="532">cabinet</button></div>
+          <video data-fps="9" data-frames="75" width="2400" height="350" data-autoplay muted loop playsinline preload="metadata" poster="static/videos/sim_rigid_p90_poster.jpg"><source src="static/videos/sim_rigid_p90.mp4" type="video/mp4"></video>
+          <div class="rollout-title">Simulation, hardest episodes</div>
+          <div class="rollout-note">The worst-decile episode of each simulated regime, picked by PointCast's own error over the evaluation pool. Columns and colours as in the simulation section above.</div>
+        </div>
+        <div class="rollout">
+          <div class="ep-select" title="The worst-decile episode of each captured category"><button type="button" data-fps="5" data-frames="40" class="ep-btn is-active" data-src="static/videos/real_cloth_p90.mp4" data-poster="static/videos/real_cloth_p90_poster.jpg" data-w="2400" data-h="418">cloth</button><button type="button" data-fps="5" data-frames="40" class="ep-btn" data-src="static/videos/real_rope_p90.mp4" data-poster="static/videos/real_rope_p90_poster.jpg" data-w="2400" data-h="416">rope</button><button type="button" data-fps="5" data-frames="40" class="ep-btn" data-src="static/videos/real_box_p90.mp4" data-poster="static/videos/real_box_p90_poster.jpg" data-w="2400" data-h="412">box</button><button type="button" data-fps="5" data-frames="40" class="ep-btn" data-src="static/videos/real_bread_p90.mp4" data-poster="static/videos/real_bread_p90_poster.jpg" data-w="2400" data-h="322">bread</button><button type="button" data-fps="5" data-frames="40" class="ep-btn" data-src="static/videos/real_paperbag_p90.mp4" data-poster="static/videos/real_paperbag_p90_poster.jpg" data-w="2400" data-h="582">paper bag</button><button type="button" data-fps="5" data-frames="40" class="ep-btn" data-src="static/videos/real_sloth_p90.mp4" data-poster="static/videos/real_sloth_p90_poster.jpg" data-w="2400" data-h="352">sloth</button></div>
+          <video data-fps="5" data-frames="40" width="2400" height="418" data-autoplay muted loop playsinline preload="metadata" poster="static/videos/real_cloth_p90_poster.jpg"><source src="static/videos/real_cloth_p90.mp4" type="video/mp4"></video>
+          <div class="rollout-title">Real world, hardest episodes</div>
+          <div class="rollout-note">The worst-decile episode of each captured category. Across the six categories our error in the worst decile is 2.3 to 6.4 times our error in the best, so a single episode is a poor guide to what the model does on the next one.</div>
+        </div>
+        <div class="rollout">
+          <div class="ep-select" title="The worst-decile episode of each zero-shot capture"><button type="button" data-fps="6" data-frames="52" class="ep-btn is-active" data-src="static/videos/zeroshot_pusht_p90.mp4" data-poster="static/videos/zeroshot_pusht_p90_poster.jpg" data-w="2400" data-h="718">Push-T</button><button type="button" data-fps="9" data-frames="70" class="ep-btn" data-src="static/videos/zeroshot_franka_dt_p90.mp4" data-poster="static/videos/zeroshot_franka_dt_p90_poster.jpg" data-w="2400" data-h="672">Franka</button></div>
+          <video data-fps="6" data-frames="52" width="2400" height="718" data-autoplay muted loop playsinline preload="metadata" poster="static/videos/zeroshot_pusht_p90_poster.jpg"><source src="static/videos/zeroshot_pusht_p90.mp4" type="video/mp4"></video>
+          <div class="rollout-title">Zero-shot, hardest windows</div>
+          <div class="rollout-note">The worst-decile window of the two zero-shot captures that carry more than one registered window.</div>
+        </div>
+  </div>
+  <div class="container is-max-desktop">
+    <h3 class="title is-4 has-text-centered" style="margin-top:2.5rem">The model does not start a push from rest</h3>
+    <p class="section-lead">PointCast plans the rope drag task and cannot start the rope push task. Placed at rest one centimetre behind a stationary rope, it predicts about 2 mm of motion for a push the simulator answers with 37 mm, so holding still looks as good as pushing and the planner never commits. Nothing in its rope push training data shows a visible tool beside a still rope: there the rope is already moving within one frame of the tool appearing, so the model learned to continue the motion it observes rather than to read the tool. The same behaviour appears in a checkpoint trained on identical data with a deterministic head, and it is unchanged across guidance scales, so this is a property of what the model was shown and not of how it samples. A model that ties motion to the tool instead of to the observed history does start the push. Repairing ours needs training data whose pushes begin before contact.</p>
+    <div class="video-grid">
+<div class="video-card">
+          <video data-fps="4" data-frames="11" width="1600" height="1000" data-autoplay muted loop playsinline preload="metadata" poster="static/videos/planning_rope_s14_poster.jpg"><source src="static/videos/planning_rope_s14.mp4" type="video/mp4"></video>
+          <div class="video-title">Dragging a rope</div>
+          <div class="video-note">The rope drag task from the planning section above, repeated here for contrast. The model plans the carry and the target is reached at the first window.</div>
+        </div>
+        <div class="video-card">
+          <video data-fps="4" data-frames="32" width="1600" height="1000" data-autoplay muted loop playsinline preload="metadata" poster="static/videos/limitation_rope_push_poster.jpg"><source src="static/videos/limitation_rope_push.mp4" type="video/mp4"></video>
+          <div class="video-title">Starting a push on a rope</div>
+          <div class="video-note">The rope push task, every window of the budget. The pusher reaches the rope and the model never asks it to move, so the rope stays straight and the goal shape is never approached.</div>
+        </div>
+    </div>
+
+    <h3 class="title is-4 has-text-centered" style="margin-top:2.5rem">Where the benchmark saturates</h3>
+    <p class="section-lead">The planning tasks that carry an object to a goal are reached by every learned world model within the first few windows, so those rows separate the planner from the models rather than the models from each other. The two pushing tasks are the ones that discriminate, and below the success bar the paper reports, their ordering is not stable.</p>
+  </div>
+</section>
+
+<!-- ===================== supplementary ===================== -->
+<section class="section" id="supp">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">Supplementary tables</h2>
+    <p class="section-lead">Comparisons that did not fit the paper, with their protocol notes.</p>
+    <details class="extra">
+      <summary>Planning: pooled paired Wilcoxon p-values behind Table V</summary>
+    <div class="table-wrap">
+      <table class="paper-table is-wide">
+        <caption>Table V. Planning across five tasks</caption>
+        <thead><tr><th>Task</th><th>Metric</th><th>init</th><th>random</th><th>AdaptiGraph</th><th>PGND</th><th>PTv3</th><th>ParticleFormer</th><th>PointCast (ours)</th></tr></thead>
+        <tbody>
+          <tr><td>Push-to-goal</td><td>per-point (cm)</td><td>&ndash;</td><td>0.0 / 12.29 [17.17]</td><td>25.0 / 10.54 [16.60]</td><td>75.0 / 5.34 [15.72]</td><td>93.8 / 3.00 [6.22]</td><td class="second">93.8 / 2.69 [5.84]</td><td class="best" style="background:var(--ours)">100 / 2.59 [6.70]</td></tr>
+          <tr><td>SE(2) pose push</td><td>per-point (cm)</td><td>&ndash;</td><td>0.0 / 12.61 [17.32]</td><td>0.0 / 11.17 [16.89]</td><td>68.8 / 4.79 [14.46]</td><td>62.5 / 2.75 [5.06]</td><td class="second">68.8 / 2.56 [4.14]</td><td class="best" style="background:var(--ours)">87.5 / 1.93 [3.22]</td></tr>
+          <tr><td>Articulated opening</td><td>part err (cm)</td><td>&ndash;</td><td>6.2 / 14.63 [25.93]</td><td>68.8 / 4.89 [15.00]</td><td>93.8 / 0.89 [1.36]</td><td>87.5 / 0.45 [1.06]</td><td class="best">100 / 0.21 [0.56]</td><td class="second" style="background:var(--ours)">100 / 0.41 [0.99]</td></tr>
+          <tr><td>Cloth drag</td><td>Chamfer (cm)</td><td>27.8</td><td>37.5 / 41.54 [78.21]</td><td>0.0 / 27.75 [53.26]</td><td>93.8 / 2.83 [4.07]</td><td>93.8 / 2.41 [3.06]</td><td class="best">100 / 2.08 [2.66]</td><td class="second" style="background:var(--ours)">100 / 2.09 [2.66]</td></tr>
+          <tr><td>Rope drag</td><td>Chamfer (cm)</td><td>15.4</td><td>25.0 / 35.16 [48.92]</td><td>93.8 / 3.28 [3.96]</td><td class="second">93.8 / 1.91 [3.74]</td><td>93.8 / 5.87 [10.85]</td><td>93.8 / 2.16 [3.34]</td><td class="best" style="background:var(--ours)">100 / 1.71 [3.44]</td></tr>
+          <tr class="midrule"><td>Mean success (%)</td><td></td><td></td><td>13.7</td><td>37.5</td><td>85.0</td><td>86.3</td><td class="second">91.3</td><td class="best" style="background:var(--ours)">97.5</td></tr>
+        </tbody>
+      </table>
+    </div>
+        <p class="table-note"><b>Pooled paired Wilcoxon p-values, PointCast against each column</b> (80 episodes, each distance normalized by its median across models; the test IV-D names, values kept for the page): ParticleFormer 0.5682, PGND 0.05036, PTv3 3.158e-4, AdaptiGraph 8.153e-14, random 7.85e-15.</p>
+    </details>
+    <details class="extra">
+      <summary>Additional ablation rows not printed in the paper</summary>
+      <div class="content has-text-justified">
+        <p>These rows were cut from Table IV for the page limit or moved here by ruling. They were trained and scored on the training lineage that preceded the shipped recipe (constant learning rate, the same architecture and pools). Their base row is therefore a different checkpoint from the shaded row of Table IV, and the two tables are not compared cell to cell. Each row is read against its own base, as in the notes. All rows are scored at <i>S</i> = 1 on the pools of Table I, with the cabinet column the actuated joint.</p>
+      </div>
+      <div class="table-wrap">
+        <table class="paper-table">
+          <caption>Rows from the earlier training lineage, mean rollout error (mm)</caption>
+          <thead><tr><th>Variant</th><th>Rigid</th><th>Cloth</th><th>Rope</th><th>Cabinet*</th></tr></thead>
+          <tbody>
+            <tr class="group"><td colspan="5">Number of control points (<i>K</i> = 128 is the base of this lineage)</td></tr>
+            <tr><td class="indent"><i>K</i> = 32</td><td>28.07</td><td>41.38</td><td>15.09</td><td>12.82</td></tr>
+            <tr><td class="indent"><i>K</i> = 256</td><td>25.61</td><td>28.45</td><td>16.38</td><td>9.13</td></tr>
+            <tr><td class="indent"><i>K</i> = 512</td><td>30.26</td><td>31.95</td><td>18.27</td><td>18.49</td></tr>
+            <tr class="group"><td colspan="5">Architecture</td></tr>
+            <tr><td class="indent">no register tokens</td><td>27.08</td><td>30.48</td><td>16.68</td><td>9.56</td></tr>
+            <tr><td class="indent">local-only self-attention</td><td>26.54</td><td>31.26</td><td>16.34</td><td>8.92</td></tr>
+            <tr><td class="indent">global-only self-attention</td><td>27.54</td><td>31.01</td><td>16.41</td><td>7.89</td></tr>
+            <tr class="group"><td colspan="5">Recipe and checkpoints</td></tr>
+            <tr><td class="indent">no part-rigidity term (cabinet)</td><td>&ndash;</td><td>&ndash;</td><td>&ndash;</td><td>7.12</td></tr>
+            <tr><td class="indent">joint checkpoint, 1&times; budget</td><td>34.08</td><td>42.73</td><td>19.32</td><td>62.61</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="content has-text-justified">
+        <ul class="claims">
+          <li><strong>Control points.</strong> Against this lineage's <i>K</i> = 128 base, <i>K</i> = 256 is better on cloth (&minus;10.4%) and rope (&minus;1.9%) and worse on rigid (+1.2%); <i>K</i> = 32 and <i>K</i> = 512 are worse on the cabinet joint. <i>K</i> = 128 is a compromise across regimes, not a per-regime optimum.</li>
+          <li><strong>Register tokens.</strong> Removing them is +7.0% on rigid and &minus;4.0% on cloth by paired test, and a tie on rope (&minus;0.1%).</li>
+          <li><strong>Self-attention pattern.</strong> Against the alternating base, local-only is +4.9% / &minus;1.5% / &minus;2.1% / +7.0% and global-only +8.8% / &minus;2.3% / &minus;1.7% / &minus;5.3% on rigid / cloth / rope / cabinet joint. Both exceed the three-seed spread on rigid alone (spread 3.2% rigid, 4.5% cloth, 19% rope, 18.2% cabinet joint). The pattern is load-bearing on rigid and inside the spread elsewhere.</li>
+          <li><strong>Part-rigidity term.</strong> A per-part rigid-alignment term the earlier recipe carried on the cabinet; it is not in the shipped recipe.</li>
+          <li><strong>Joint checkpoint at 1&times; budget.</strong> One checkpoint on all four pools at the per-regime budget, +34.7% / +34.6% / +15.7% on rigid / cloth / rope against that lineage's per-regime cells. Its checkpoint selection was made on rigid alone, and the 4&times;-budget row of Table IV, selected on a regime-balanced validation slice, supersedes it.</li>
+        </ul>
+      </div>
+    </details>
+    <details class="extra">
+      <summary>Real benchmark with AdaptiGraph at its gate, zero-shot with AdaptiGraph, simulation checkpoints on the PGND benchmark, ParticleFormer reimplementation</summary>
+    <div class="content has-text-justified">
+      <p>The comparisons below did not fit the paper or were ruled out of it. They are complete tables with their own protocol notes, kept here so that every method appears on every benchmark.</p>
+
+      <h3 class="title is-4" style="margin-top:0">Real benchmark with AdaptiGraph, every method starting at AdaptiGraph's gate</h3>
+      <p>AdaptiGraph's released evaluation starts its rollout at the first frame in which the end-effector moves (its gate) and reaches the benchmark's scored frame in only part of the episodes. Here every method starts predicting at that gate: the last observed frame is the one before it, and the target is <i>H</i> = 10 predicted frames after it. Episodes whose target falls past the end of the recording are excluded. Values are mean mm over all kept episodes; the AdaptiGraph column covers only the episodes its own rollout reaches (<i>n</i><sub>AG</sub>) and is paired against PointCast on those episodes. PGND is scored on its own particle subset by its own driver. The horizon is 10 predicted frames after the gate, not Table II's 29 from the episode start, and these values are not Table II cells.</p>
+    </div>
+
+    <div class="table-wrap">
+      <table class="paper-table">
+        <caption>Gate-aligned PGND benchmark, <i>H</i> = 10 (mm)</caption>
+        <thead><tr><th>Category</th><th><i>n</i></th><th>PointCast</th><th>ParticleFormer</th><th>PTv3</th><th>PGND</th><th>AdaptiGraph (<i>n</i><sub>AG</sub>)</th><th>PointCast vs AdaptiGraph, <i>p</i></th></tr></thead>
+        <tbody>
+          <tr><td>cloth</td><td>40</td><td>18.07</td><td class="best">16.22</td><td>20.94</td><td>18.85</td><td>20.25 (24)</td><td>0.47</td></tr>
+          <tr><td>rope</td><td>39</td><td class="best">9.65</td><td>12.62</td><td>14.45</td><td>15.16</td><td>23.37 (26)</td><td>6.0e-8</td></tr>
+          <tr><td>box</td><td>20</td><td class="best">13.68</td><td>14.27</td><td>13.96</td><td>16.43</td><td>14.05 (13)</td><td>0.79</td></tr>
+          <tr><td>bread</td><td>20</td><td class="best">8.29</td><td>9.93</td><td>10.71</td><td>9.14</td><td>11.81 (11)</td><td>0.019</td></tr>
+          <tr><td>paper bag</td><td>20</td><td class="best">7.83</td><td>15.10</td><td>11.05</td><td>9.63</td><td>10.47 (12)</td><td>0.13</td></tr>
+          <tr><td>plush</td><td>19</td><td>21.44</td><td>25.03</td><td>24.56</td><td class="best">20.15</td><td>29.97 (16)</td><td>0.011</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-wrap">
+      <table class="paper-table">
+        <caption>Paired Wilcoxon at <i>H</i> = 10, PointCast against each method (episodes on which PointCast is better / <i>n</i>, <i>p</i>)</caption>
+        <thead><tr><th>Category</th><th>vs ParticleFormer</th><th>vs PTv3</th><th>vs PGND</th></tr></thead>
+        <tbody>
+          <tr><td>cloth</td><td>14/40, 0.070</td><td>30/40, 0.0083</td><td>25/40, 0.31</td></tr>
+          <tr><td>rope</td><td>25/39, 0.0012</td><td>31/39, 1.5e-5</td><td>33/39, 2.5e-6</td></tr>
+          <tr><td>box</td><td>14/20, 0.12</td><td>12/20, 0.55</td><td>12/20, 0.22</td></tr>
+          <tr><td>bread</td><td>12/20, 0.11</td><td>14/20, 0.040</td><td>10/20, 0.41</td></tr>
+          <tr><td>paper bag</td><td>14/20, 0.036</td><td>15/20, 0.012</td><td>17/20, 0.015</td></tr>
+          <tr><td>plush</td><td>14/19, 0.012</td><td>15/19, 0.016</td><td>9/19, 0.57</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="table-note">With every method starting at the gate, PointCast has the best mean in four of six categories (rope, box, bread, paper bag), ParticleFormer leads cloth and PGND leads plush. AdaptiGraph is significantly better nowhere, and is significantly worse than PointCast on rope, bread and plush, on the episodes its own rollout reaches.</p>
+
+    <div class="content has-text-justified">
+      <h3 class="title is-4">Zero-shot transfer with the AdaptiGraph column</h3>
+      <p>The four printed columns are Table III. AdaptiGraph is scored on its own motion-gated frame set and reported with the ratio to its own static null in parentheses (a rollout that never moves the object). Its raw mm is therefore not comparable across the row, which is why the paper omits it. On the Push-T row AdaptiGraph's value depends on its radius-estimation setting (35.21 with pooled radii, 37.02 with base radii); the pooled value is printed.</p>
+    </div>
+    <div class="table-wrap">
+      <table class="paper-table">
+        <caption>Zero-shot transfer, rollout error (mm), AdaptiGraph restored</caption>
+        <thead><tr><th>Capture (<i>n</i>)</th><th>PGND</th><th>PTv3</th><th>ParticleFormer</th><th>PointCast</th><th>AdaptiGraph (&times; own null)</th></tr></thead>
+        <tbody>
+          <tr><td>Push-T replay (70)</td><td>37.27</td><td>24.67</td><td>18.07</td><td class="best">15.35</td><td>35.21 (0.658)</td></tr>
+          <tr><td>Franka blocks (35)</td><td>75.38</td><td>60.30</td><td>72.50</td><td class="best">52.86</td><td>68.33 (0.756)</td></tr>
+          <tr><td>Rope (123)</td><td>58.07</td><td>83.45</td><td class="best">42.47</td><td>49.05</td><td>55.99 (0.862)</td></tr>
+          <tr><td>Cloth (31)</td><td>291.12</td><td>54.77</td><td class="best">32.43</td><td>42.20</td><td>44.62 (0.966)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="content has-text-justified">
+      <h3 class="title is-4">Simulation checkpoints on the PGND benchmark, zero-shot</h3>
+      <p>The cloth and rope simulation checkpoints of Table I, applied with no real data to the PGND benchmark's own 40-episode test splits and scored on the benchmark's metric, the mean displacement error at step 30 in mm. Two protocols: matched cadence keeps the benchmark's frame rate, the same inputs as every Table II arm with only the checkpoint changed; matched operating point re-strides the same episodes until a window carries the end-effector motion of a training window, and scores at the same physical target. Both at the deployed <i>S</i> = 1. The two reference rows are Table II cells.</p>
+    </div>
+    <div class="table-wrap">
+      <table class="paper-table">
+        <caption>PGND benchmark, displacement error at step 30 (mm), <i>n</i> = 40 per cell</caption>
+        <thead><tr><th>Arm</th><th>Cloth</th><th>Rope</th></tr></thead>
+        <tbody>
+          <tr><td>Simulation checkpoint, zero-shot, matched cadence</td><td>92.45</td><td>134.33</td></tr>
+          <tr><td>Simulation checkpoint, zero-shot, matched operating point</td><td>65.25</td><td>51.87</td></tr>
+          <tr class="ours midrule"><td>PointCast trained in-domain (Table II)</td><td>32.20</td><td>15.83</td></tr>
+          <tr><td>PGND native (Table II)</td><td>44.49</td><td>39.14</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="table-note">Re-striding to the training operating point closes 45% (cloth) and 70% (rope) of the distance from the matched-cadence cell to the in-domain cell, which places most of the matched-cadence error in the action-distribution mismatch rather than in the geometric interface. Closing the rest requires target-domain episodes, which is what Table II then shows the same architecture doing. One seed per arm; no fine-tuning arm was run.</p>
+
+    <div class="content has-text-justified">
+      <h3 class="title is-4">ParticleFormer reimplementation</h3>
+      <p>ParticleFormer released neither code nor hyperparameters. Our reimplementation follows the paper element by element; the hyperparameters the paper leaves open take the values of our shared training protocol.</p>
+    </div>
+    <div class="table-wrap">
+      <table class="paper-table mapping-table">
+        <caption>Paper element to our implementation</caption>
+        <thead><tr><th>Element</th><th>ParticleFormer paper</th><th>Our implementation</th></tr></thead>
+        <tbody>
+          <tr><td>Backbone</td><td>L = 3 plain full-attention Transformer encoder over all particle tokens; no positional encodings (Sec. 3.2)</td><td>Standard Transformer encoder, L = 3, full attention, no positional encoding, no rotary embedding, no kNN mask</td></tr>
+          <tr><td>Token</td><td>z(i) = f_proj([x(i), m(i), u(i)]) (Eq. 2)</td><td>[position (3), motion (3), type one-hot (2)] through an MLP projection</td></tr>
+          <tr><td>End-effector particles</td><td>First-class tokens in the same self-attention</td><td>Actor points (with per-point motion) as in-stream tokens; padded slots masked</td></tr>
+          <tr><td>Object motion input</td><td>u_obj = 0; Markov, no history or velocity (Eq. 1 and 2)</td><td>Object tokens carry motion = 0 and only the last history frame's positions</td></tr>
+          <tr><td>Decoding</td><td>Shared per-particle displacement head, x&#770; = x + &Delta;x&#770; (Eq. 4 and 5)</td><td>LayerNorm + Linear(d to 3), clamped, added to the last positions</td></tr>
+          <tr><td>Loss</td><td>L = &alpha;&middot;CD + (1 &minus; &alpha;)&middot;HD (Eq. 6)</td><td>&alpha; times the symmetric Chamfer distance plus (1 &minus; &alpha;) times the Hausdorff distance</td></tr>
+          <tr><td>Training</td><td>k-step autoregressive unroll, k = 5, loss over the rollout (Sec. 3.3)</td><td>k = 5 unroll, per-step hybrid loss (mean), full backpropagation through the unroll</td></tr>
+          <tr><td>Inference</td><td>Deterministic single forward per step</td><td>Deterministic head, one forward per rollout window</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="table-note">Protocol-conformed settings, identical to PointCast and PTv3: <i>K</i> = 128 farthest-point-sampled control points and 16 end-effector points, five history windows, the per-regime frame stride, position normalization, rotation augmentation, state noise, the 0.85 / 0.15 split by object, Adam at learning rate 1e-4 with the cosine schedule, batch 64, 200 epochs, seed 42.</p>
+    </details>
+  </div>
+</section>
+
+<!-- ===================== bibtex ===================== -->
+<section class="section" id="bibtex">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">BibTeX</h2>
+    <div style="display:flex;justify-content:flex-end;margin-bottom:.5rem"><button id="copy-bibtex" class="button is-small">Copy</button></div>
+<pre class="bibtex"><code id="bibtex-code">@inproceedings{pointcast2027,
+  title     = {PointCast: One World Model for Rigid, Articulated, and Deformable Object Manipulation},
+  author    = {Anonymous Authors},
+  booktitle = {Submission to the IEEE International Conference on Robotics and Automation (ICRA)},
+  year      = {2027},
+  note      = {Author information omitted for double-anonymous review}
+}</code></pre>
+  </div>
+</section>
+
+</main>
+
+<footer class="footer">
+  <div class="container is-max-desktop has-text-centered">
+    <p>Anonymous project page for double-anonymous review. Photographs and Gaussian splats of the real-world rollouts are from the PGND release and are used under its terms.</p>
+    <p>Page layout adapted from the <a href="https://github.com/eliahuhorwitz/Academic-project-page-template" rel="noopener">Academic Project Page Template</a>, itself based on the <a href="https://nerfies.github.io" rel="noopener">Nerfies</a> page, under the <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="noopener">CC BY-SA 4.0</a> license.</p>
+  </div>
+</footer>
+
+<script src="static/js/index.js"></script>
+</body>
+</html>
