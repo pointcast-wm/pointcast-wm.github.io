@@ -313,7 +313,7 @@
     </div>
 
     <h3 class="title is-4 has-text-centered" style="margin-top:2.5rem">Where the benchmark saturates</h3>
-    <p class="section-lead">The planning tasks that carry an object to a goal are reached by every learned world model within the first few windows, so those rows separate the planner from the models rather than the models from each other. The two pushing tasks are the ones that discriminate, and below the success bar the paper reports, their ordering is not stable.</p>
+    <p class="section-lead">The planning tasks that carry an object to a goal are reached by every learned world model within the first few windows, so those rows separate the planner from the models rather than the models from each other. The SE(2) pose push is the one that discriminates, and below it the ordering is not stable: the planner's own re-run spread is 4.6% on push and 46.1% on the cabinet, so a single per-task cell is not a ranking.</p>
   </div>
 </section>
 
